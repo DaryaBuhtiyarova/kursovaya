@@ -1,0 +1,94 @@
+<div class="modal fade" id="create_assignment_modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/assignment/create" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Новое поручение</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <input class="form-control" type="text" name="text" placeholder="Задача" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="executor_id_select">Исполнитель</label>
+                        <select class="form-control" id="executor_id_select" name="executor_id" required>
+                            {% if current_user.is_director() %}
+                            {% for department_head in department_heads %}
+                            <option value="{{department_head.id}}">{{department_head.first_name}}
+                                {{department_head.last_name}}
+                                [{{department_head.role}}]
+                            </option>
+                            {% endfor %}
+                            {% endif %}
+                            {% for employee in employees %}
+                            <option value="{{employee.id}}">{{employee.first_name}} {{employee.last_name}}
+                                [{{employee.role}}]
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn form-control btn-outline-dark">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="profile_modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content rounded-4 shadow">
+            <div class="modal-header p-5 pb-4 border-bottom-0">
+                <!-- <h1 class="modal-title fs-5" >Modal title</h1> -->
+                <h1 class="fw-bold mb-0 fs-2">{{current_user.username}}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-5 pt-0">
+                <form class="">
+                    <div class="form-floating mb-3">
+                        <input type="text" value="{{current_user.first_name}}" class="form-control rounded-3"
+                               id="first_name_input" readonly>
+                        <label for="first_name_input">Имя</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" value="{{current_user.last_name}}" class="form-control rounded-3"
+                               id="last_name_input" readonly>
+                        <label for="last_name_input">Фамилия</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" value="{{current_user.role}}" class="form-control rounded-3"
+                               id="role_input" readonly>
+                        <label for="role_input">Тип учетной записи</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" value="{{current_user.password_hash}}" class="form-control rounded-3"
+                               id="sign_input" readonly>
+                        <label for="sign_input">Ваша подпись</label>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<nav class="navbar">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+            <i class="bi bi-check2-square"></i>
+            DocumentFlow
+        </a>
+        <div class="d-flex">
+            <h6 class="navbar-brand shadow rounded">
+                {{current_user.role}}
+            </h6>
+            {% if current_user.is_director() or current_user.is_department_head()%}
+            <button class="rounded btn btn-sm btn-outline-dark" data-bs-toggle="modal"
+                    data-bs-target="#create_assignment_modal" type="button">+Создать поручение
+            </button>
+            {% endif %}
+            <button class="btn btn-outline-dark ms-2" data-bs-toggle="modal" data-bs-target="#profile_modal"
+                    type="button"><i class="bi bi-person-badge"></i></button>
+            <a href="/logout" class="btn btn-outline-danger ms-2 me-4" type="button"><i class="bi bi-x-lg"></i></a>
+        </div>
+    </div>
+</nav>

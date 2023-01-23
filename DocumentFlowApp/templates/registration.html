@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block body %}
+
+<div class="bg-light rounded mt-2 shadow p-4">
+    <h1>Пожалуйста зарегистрируйтесь</h1>
+    {% if message %}
+    <div class="h3 text-danger">
+        {{message}}
+    </div>
+    {% endif %}
+    <form class="form-control p-3" action="/registration" method="post">
+        <div class="mb-3">
+            <input class="form-control" type="text" name="first_name" placeholder="Имя" required/>
+        </div>
+        <div class="mb-3">
+            <input class="form-control" type="text" name="last_name" placeholder="Фамилия" required/>
+        </div>
+        <div class="mb-3">
+            <input class="form-control" type="text" name="username" placeholder="Логин" required/>
+        </div>
+        <div class="mb-3">
+            <input class="form-control" type="password" name="password" placeholder="Пароль" required/>
+        </div>
+        <div class="mb-3">
+            <select class="form-control" name="role">
+                {% for role in roles %}
+                <option value="{{role}}">{{role}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <button class="btn btn-outline-primary" type="submit">Зарегистрироваться</button>
+            <a href="/login" class="btn btn-outline-primary">Уже есть учетная запись</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

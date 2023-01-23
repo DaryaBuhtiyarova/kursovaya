@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="bg-light rounded mt-2 shadow p-4">
+    {% include 'navbar.html' %}
+    <hr>
+    {% for assignment in assignments %}
+    <div class="modal fade" id="assignment{{assignment.id}}_modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content rounded-4 shadow">
+                <div class="modal-header p-5 pb-4 border-bottom-0">
+                    <!-- <h1 class="modal-title fs-5" >Modal title</h1> -->
+                    <h1 class="fw-bold mb-0 fs-2">Поручение #{{assignment.id}}</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-5 pt-0">
+                    <div class="form-floating mb-3">
+                        <input type="text" value="{{assignment.text}}" class="form-control rounded-3"
+                               id="text_input" readonly>
+                        <label for="text_input">Задача</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        {% if assignment.director_sign %}
+                        <input type="text" value="{{assignment.director_sign}}"
+                               class="text-success border border-success shadow form-control rounded-3"
+                               id="director_sign_input1{{assignment.id}}" readonly>
+                        <label for="director_sign_input1{{assignment.id}}">Подпись директора</label>
+                        {% else %}
+                        <input type="text" value="НЕ ПОДПИСАНО"
+                               class="text-danger border border-danger shadow form-control rounded-3"
+                               id="director_sign_input2" readonly>
+                        <label for="director_sign_input2">Подпись директора</label>
+                        {% endif %}
+                    </div>
+                    <div class="form-floating mb-3">
+                        {% if assignment.department_head_sign %}
+                        <input type="text" value="{{assignment.department_head_sign}}"
+                               class="text-success border border-success shadow form-control rounded-3"
+                               id="department_head_sign_input1{{assignment.id}}" readonly>
+                        <label for="department_head_sign_input1{{assignment.id}}">Подпись главы отдела</label>
+                        {% else %}
+                        <input type="text" value="НЕ ПОДПИСАНО"
+                               class="text-danger border border-danger shadow form-control rounded-3"
+                               id="department_head_sign_input2{{assignment.id}}" readonly>
+                        <label for="department_head_sign_input2{{assignment.id}}">Подпись главы отдела</label>
+                        {% endif %}
+                    </div>
+                    <div class="form-floating mb-3">
+                        {% if assignment.employee_sign %}
+                        <input type="text" value="{{assignment.employee_sign}}"
+                               class="text-success border border-success shadow form-control rounded-3"
+                               id="employee_sign_input1{{assignment.id}}" readonly>
+                        <label for="employee_sign_input1{{assignment.id}}">Подпись специалиста отдела</label>
+                        {% else %}
+                        <input type="text" value="НЕ ПОДПИСАНО"
+                               class="text-danger border border-danger shadow form-control rounded-3"
+                               id="employee_sign_input2{{assignment.id}}" readonly>
+                        <label for="employee_sign_input2{{assignment.id}}">Подпись специалиста отдела</label>
+                        {% endif %}
+                    </div>
+                    {% if assignment.file_name %}
+                    <a href="/assignment/{{assignment.id}}/file/download" class="w-100 mb-2 btn rounded-3 btn-outline-dark" type="submit">Загрузить прикрепленный файл</a>
+                    {% else %}
+                    <form enctype="multipart/form-data" action="/assignment/file/upload" method="post">
+                        <input name="assignment_id" value="{{assignment.id}}" hidden>
+                        <input class="w-100 form-control mb-2" name="file" type="file" value="{{assignment.id}}" required>
+                        <button class="w-100 mb-2 btn rounded-3 btn-outline-dark" type="submit">Добавить файл</button>
+                    </form>
+                    {% endif %}
+
+                    <form action="/assignment/sign" method="post">
+                        <input name="assignment_id" value="{{assignment.id}}" hidden>
+                        <button class="w-100 mb-2 btn rounded-3 btn-outline-success" type="submit">Подписать</button>
+                    </form>
+                    <form action="/assignment/sign/remove" method="post">
+                        <input name="assignment_id" value="{{assignment.id}}" hidden>
+                        <button class="w-100 mb-2 btn rounded-3 btn-warning" type="submit">Отозвать</button>
+                    </form>
+                    <form action="/assignment/delegate" method="post">
+                        <input name="assignment_id" value="{{assignment.id}}" hidden>
+                        <div class="d-flex">
+                            <div class="w-75">
+                                <select class="form-control" id="executor_id_select" name="executor_id" required>
+                                    {% if current_user.is_director() %}
+                                    {% for department_head in department_heads %}
+                                    <option value="{{department_head.id}}">{{department_head.first_name}}
+                                        {{department_head.last_name}}
+                                        [{{department_head.role}}]
+                                    </option>
+                                    {% endfor %}
+                                    {% endif %}
+                                    {% for employee in employees %}
+                                    <option value="{{employee.id}}">{{employee.first_name}} {{employee.last_name}}
+                                        [{{employee.role}}]
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button class="form-control ms-4 btn rounded-3 btn-primary" type="submit">
+                                Делегировать/Вернуть в работу
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    <h4 class="text-muted"><code>Список поручений на подпись</code></h4>
+    <div class="list-group">
+        {% for assignment in assignments %}
+        <a href="#" data-bs-toggle="modal" data-bs-target="#assignment{{assignment.id}}_modal"
+           class="list-group-item list-group-item-action">{{assignment.text}}</a>
+        {% endfor %}
+    </div>
+    {% if current_user.is_director() %}
+    <h4 class="text-muted "><code class="text-success">Список выполненных поручений</code></h4>
+    <div class="list-group">
+        {% for assignment in completed_assignments %}
+        <a href="#" data-bs-toggle="modal" data-bs-target="#assignment{{assignment.id}}_modal"
+           class="list-group-item list-group-item-action">{{assignment.text}}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
